@@ -10,7 +10,7 @@ const rl = readline.createInterface({
 type Task = {
   id: number;
   description: string;
-  status:"todo" | "Progress" | "Done";
+  status:"todo" | "in-progress" | "done";
   createdAt: Date;
   updatedAt: Date;
 };
@@ -138,12 +138,35 @@ function markInProgress(arg: string[]): void {
       const id = parseInt(arg[0]) ;
       task.forEach((t)=>{
         if (t.id === id) {
-            t.status = "Progress"
+            t.status = "in-progress"
         }
       })
       
       const tasks = JSON.stringify(task, null, 2);
       fs.writeFileSync(filePath, tasks);
+    } else {
+      console.log("Task file don't exist");
+      return;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return;
+}
+
+function showList(arg: string[]): void {
+  try {
+    if (fs.existsSync(filePath)) {
+      const temp = fs.readFileSync(filePath, "utf-8");
+      const task: Task[] = JSON.parse(temp) as Task[];
+    if(arg.length < 1){
+        console.table(task);
+        return;
+    }
+    const doneTasks = task.filter((t)=> t.status === arg[0])
+    console.table(doneTasks);
+    return;
+    
     } else {
       console.log("Task file don't exist");
       return;
@@ -174,7 +197,7 @@ function markDone(arg: string[]): void {
       const id = parseInt(arg[0]) ;
       task.forEach((t)=>{
         if (t.id === id) {
-            t.status = "Done"
+            t.status = "done"
         }
       })
       const tasks = JSON.stringify(task, null, 2);
@@ -218,6 +241,8 @@ function cmdline() {
         cmdline();
         break;
       case "list":
+        showList(arg);
+        cmdline();
         break;
       case "exit":
         rl.close();
