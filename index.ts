@@ -45,9 +45,43 @@ function add(arg: string[]): number {
     return len;
   } catch (e) {
     console.error(e);
-    
+
     return 0;
   }
+}
+
+function update(arg: string[]): void {
+  if (arg.length < 2) {
+    console.error("Some parameteres missing");
+    return;
+  }
+  try {
+    if (fs.existsSync(filePath)) {
+      const temp = fs.readFileSync(filePath, "utf-8");
+      const task: Task[] = JSON.parse(temp) as Task[];
+
+      if (
+        typeof parseInt(arg[0]) !== "number" ||
+        isNaN(parseInt(arg[0])) ||
+        parseInt(arg[0]) === 0
+      ) {
+        console.error("incorrect ID passed");
+        return;
+      }
+      const id = parseInt(arg[0]) - 1;
+      const changeDesc = arg.slice(1);
+      task[id].description = changeDesc.join(" ");
+      
+      const tasks = JSON.stringify(task, null, 2);
+      fs.writeFileSync(filePath, tasks);
+    } else {
+      console.log("Task file don't exist");
+      return;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return;
 }
 function cmdline() {
   rl.question("task-cli ", (cmds) => {
@@ -61,6 +95,8 @@ function cmdline() {
         cmdline();
         break;
       case "update":
+        update(arg);
+        cmdline();
         break;
       case "delete":
         break;
