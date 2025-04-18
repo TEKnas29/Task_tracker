@@ -10,7 +10,7 @@ const rl = readline.createInterface({
 type Task = {
   id: number;
   description: string;
-  status: "Progress" | "Done";
+  status:"todo" | "Progress" | "Done";
   createdAt: Date;
   updatedAt: Date;
 };
@@ -22,9 +22,9 @@ function add(arg: string[]): number {
       const temp = fs.readFileSync(filePath, "utf-8");
       const task = JSON.parse(temp) as Task[];
       task.push({
-        id: task.length + 1,
+        id: task[task.length - 1].id + 1,
         description: arg.join(" "),
-        status: "Progress",
+        status: "todo",
         createdAt: currentDate,
         updatedAt: currentDate,
       });
@@ -35,7 +35,7 @@ function add(arg: string[]): number {
       const task: Task = {
         id: 1,
         description: arg.join(" "),
-        status: "Progress",
+        status: "todo",
         createdAt: currentDate,
         updatedAt: currentDate,
       };
@@ -49,7 +49,6 @@ function add(arg: string[]): number {
     return 0;
   }
 }
-
 function update(arg: string[]): void {
   if (arg.length < 2) {
     console.error("Some parameteres missing");
@@ -61,17 +60,19 @@ function update(arg: string[]): void {
       const task: Task[] = JSON.parse(temp) as Task[];
 
       if (
-        parseInt(arg[0]) > task.length ||
         isNaN(parseInt(arg[0])) ||
         parseInt(arg[0]) === 0 
       ) {
         console.error("incorrect ID passed");
         return;
       }
-      const id = parseInt(arg[0]) - 1;
+      const id = parseInt(arg[0]);
       const changeDesc = arg.slice(1);
-      task[id].description = changeDesc.join(" ");
-      
+      task.forEach((t)=>{
+        if (t.id === id) {
+            t.description = changeDesc.join(" ")
+        }
+      })
       const tasks = JSON.stringify(task, null, 2);
       fs.writeFileSync(filePath, tasks);
     } else {
@@ -95,7 +96,6 @@ function deleteTask(arg: string[]): void {
       const task: Task[] = JSON.parse(temp) as Task[];
 
       if (
-        typeof parseInt(arg[0]) !== "number" ||
         isNaN(parseInt(arg[0])) ||
         parseInt(arg[0]) === 0
       ) {
@@ -107,6 +107,77 @@ function deleteTask(arg: string[]): void {
       
       const tasks = JSON.stringify(changeDesc, null, 2);
       
+      fs.writeFileSync(filePath, tasks);
+    } else {
+      console.log("Task file don't exist");
+      return;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return;
+}
+function markInProgress(arg: string[]): void {
+
+  if (arg.length > 1) {
+    console.error("Please only provide ID");
+    return;
+  }
+  try {
+    if (fs.existsSync(filePath)) {
+      const temp = fs.readFileSync(filePath, "utf-8");
+      const task: Task[] = JSON.parse(temp) as Task[];
+
+      if (
+        isNaN(parseInt(arg[0])) ||
+        parseInt(arg[0]) === 0
+      ) {
+        console.error("incorrect ID passed");
+        return;
+      }
+      const id = parseInt(arg[0]) ;
+      task.forEach((t)=>{
+        if (t.id === id) {
+            t.status = "Progress"
+        }
+      })
+      
+      const tasks = JSON.stringify(task, null, 2);
+      fs.writeFileSync(filePath, tasks);
+    } else {
+      console.log("Task file don't exist");
+      return;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return;
+}
+function markDone(arg: string[]): void {
+
+  if (arg.length > 1) {
+    console.error("Please only provide ID");
+    return;
+  }
+  try {
+    if (fs.existsSync(filePath)) {
+      const temp = fs.readFileSync(filePath, "utf-8");
+      const task: Task[] = JSON.parse(temp) as Task[];
+
+      if (
+        isNaN(parseInt(arg[0])) ||
+        parseInt(arg[0]) === 0
+      ) {
+        console.error("incorrect ID passed");
+        return;
+      }
+      const id = parseInt(arg[0]) ;
+      task.forEach((t)=>{
+        if (t.id === id) {
+            t.status = "Done"
+        }
+      })
+      const tasks = JSON.stringify(task, null, 2);
       fs.writeFileSync(filePath, tasks);
     } else {
       console.log("Task file don't exist");
@@ -139,8 +210,12 @@ function cmdline() {
         cmdline();
         break;
       case "mark-in-progress":
+        markInProgress(arg)
+        cmdline();
         break;
       case "mark-done":
+        markDone(arg)
+        cmdline();
         break;
       case "list":
         break;
