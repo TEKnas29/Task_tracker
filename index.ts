@@ -50,7 +50,7 @@ function cmdline() {
       case "add":
         let id = add(arg);
         console.log(`Task added successfully (ID: ${id})`);
-
+        cmdline();
         break;
       case "update":
         break;
@@ -72,9 +72,10 @@ function cmdline() {
 
       default:
         console.error(`${cmd} not found`);
+        cmdline();
         break;
     }
-    cmdline();
+    
   });
 }
 cmdline();
