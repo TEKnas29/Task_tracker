@@ -16,32 +16,38 @@ type Task = {
 };
 
 function add(arg: string[]): number {
-  let len = 1;
-  if (fs.existsSync(filePath)) {
-    const temp = fs.readFileSync(filePath, "utf-8");
-    const task = JSON.parse(temp) as Task[];
-    task.push({
-      id: task.length + 1,
-      description: arg.join(" "),
-      status: "Progress",
-      createdAt: currentDate,
-      updatedAt: currentDate,
-    });
-    const tasks = JSON.stringify(task, null, 2);
-    fs.writeFileSync(filePath, tasks);
-    len = task.length;
-  } else {
-    const task: Task = {
-      id: 1,
-      description: arg.join(" "),
-      status: "Progress",
-      createdAt: currentDate,
-      updatedAt: currentDate,
-    };
-    const tasks = JSON.stringify([task], null, 2);
-    fs.writeFileSync(filePath, tasks);
+  try {
+    let len = 1;
+    if (fs.existsSync(filePath)) {
+      const temp = fs.readFileSync(filePath, "utf-8");
+      const task = JSON.parse(temp) as Task[];
+      task.push({
+        id: task.length + 1,
+        description: arg.join(" "),
+        status: "Progress",
+        createdAt: currentDate,
+        updatedAt: currentDate,
+      });
+      const tasks = JSON.stringify(task, null, 2);
+      fs.writeFileSync(filePath, tasks);
+      len = task.length;
+    } else {
+      const task: Task = {
+        id: 1,
+        description: arg.join(" "),
+        status: "Progress",
+        createdAt: currentDate,
+        updatedAt: currentDate,
+      };
+      const tasks = JSON.stringify([task], null, 2);
+      fs.writeFileSync(filePath, tasks);
+    }
+    return len;
+  } catch (e) {
+    console.error(e);
+    
+    return 0;
   }
-  return len;
 }
 function cmdline() {
   rl.question("task-cli ", (cmds) => {
@@ -49,7 +55,9 @@ function cmdline() {
     switch (cmd) {
       case "add":
         let id = add(arg);
-        console.log(`Task added successfully (ID: ${id})`);
+        if (id !== 0) {
+          console.log(`Task added successfully (ID: ${id})`);
+        }
         cmdline();
         break;
       case "update":
@@ -75,7 +83,6 @@ function cmdline() {
         cmdline();
         break;
     }
-    
   });
 }
 cmdline();
