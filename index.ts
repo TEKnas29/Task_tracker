@@ -30,7 +30,7 @@ function add(arg: string[]): number {
       });
       const tasks = JSON.stringify(task, null, 2);
       fs.writeFileSync(filePath, tasks);
-      len = task.length;
+      len = task[task.length - 1].id;
     } else {
       const task: Task = {
         id: 1,
@@ -71,6 +71,7 @@ function update(arg: string[]): void {
       task.forEach((t)=>{
         if (t.id === id) {
             t.description = changeDesc.join(" ")
+            t.updatedAt = currentDate
         }
       })
       const tasks = JSON.stringify(task, null, 2);
