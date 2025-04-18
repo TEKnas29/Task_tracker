@@ -4,7 +4,8 @@
   "description": "Task tracker is a project used to track and manage your tasks.",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "bun --watch index.ts",
+    "exec" : "bun index.ts"
   },
   "author": "",
   "license": "ISC",

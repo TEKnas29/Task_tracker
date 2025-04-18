@@ -61,9 +61,9 @@ function update(arg: string[]): void {
       const task: Task[] = JSON.parse(temp) as Task[];
 
       if (
-        typeof parseInt(arg[0]) !== "number" ||
+        parseInt(arg[0]) > task.length ||
         isNaN(parseInt(arg[0])) ||
-        parseInt(arg[0]) === 0
+        parseInt(arg[0]) === 0 
       ) {
         console.error("incorrect ID passed");
         return;
@@ -83,6 +83,42 @@ function update(arg: string[]): void {
   }
   return;
 }
+function deleteTask(arg: string[]): void {
+
+  if (arg.length > 1) {
+    console.error("Please only provide ID");
+    return;
+  }
+  try {
+    if (fs.existsSync(filePath)) {
+      const temp = fs.readFileSync(filePath, "utf-8");
+      const task: Task[] = JSON.parse(temp) as Task[];
+
+      if (
+        typeof parseInt(arg[0]) !== "number" ||
+        isNaN(parseInt(arg[0])) ||
+        parseInt(arg[0]) === 0
+      ) {
+        console.error("incorrect ID passed");
+        return;
+      }
+      const id = parseInt(arg[0]) ;
+      const changeDesc = task.filter((t)=> t.id !== id)
+      
+      const tasks = JSON.stringify(changeDesc, null, 2);
+      
+      fs.writeFileSync(filePath, tasks);
+    } else {
+      console.log("Task file don't exist");
+      return;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return;
+}
+
+
 function cmdline() {
   rl.question("task-cli ", (cmds) => {
     const [cmd, ...arg] = cmds.split(" ");
@@ -98,7 +134,9 @@ function cmdline() {
         update(arg);
         cmdline();
         break;
-      case "delete":
+    case "delete":
+        deleteTask(arg);
+        cmdline();
         break;
       case "mark-in-progress":
         break;
